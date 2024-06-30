@@ -1,13 +1,21 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import styled from "styled-components";
+import { useNavigate, Link } from "react-router-dom";
 import Logo from "../assets/logo.svg";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import axios from "axios";
 import { registerRoute } from "../utils/APIRoutes";
-function Register() {
+
+export default function Register() {
   const navigate = useNavigate();
+  const toastOptions = {
+    position: "top-right",
+    autoClose: 8000,
+    pauseOnHover: true,
+    draggable: true,
+    theme: "light",
+  };
   const [values, setValues] = useState({
     username: "",
     email: "",
@@ -15,62 +23,65 @@ function Register() {
     confirmPassword: "",
   });
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    if (handleValidation()) {
-      const { password, username, email } = values;
-      const { data } = await axios.post(registerRoute, {
-        username,
-        email,
-        password,
-      });
-      if (data.status === false) {
-        toast.error(data.msg, toastOptions);
-      }
-      if (data.status === true) {
-        localStorage.setItem("chat-app", JSON.stringify(data.user));
-        navigate("/");
-      }
+  useEffect(() => {
+    if (localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)) {
+      navigate("/");
     }
-  };
-  const toastOptions = {
-    position: "bottom-right",
-    autoClose: 8000,
-    pauseOnHover: true,
-    draggable: true,
-    theme: "dark",
-  };
+  }, []);
 
   const handleChange = (event) => {
     setValues({ ...values, [event.target.name]: event.target.value });
   };
+
   const handleValidation = () => {
     const { password, confirmPassword, username, email } = values;
-
     if (password !== confirmPassword) {
       toast.error(
-        "Password and confirm password should be same.",
+        "A senha e a senha de confirmação devem ser iguais.",
         toastOptions
       );
       return false;
     } else if (username.length < 3) {
       toast.error(
-        "Username should be greater than 3 characters.",
+        "O nome de usuário deve ter mais de 3 caracteres.",
         toastOptions
       );
       return false;
     } else if (password.length < 8) {
       toast.error(
-        "Password should be equal or greater than 8 characters.",
+        "A senha deve ser igual ou superior a 8 caracteres.",
         toastOptions
       );
       return false;
     } else if (email === "") {
-      toast.error("Email is required.", toastOptions);
+      toast.error("Email é obrigatório.", toastOptions);
       return false;
     }
 
     return true;
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (handleValidation()) {
+      const { email, username, password } = values;
+      const { data } = await axios.post(registerRoute, {
+        username,
+        email,
+        password,
+      });
+
+      if (data.status === false) {
+        toast.error(data.msg, toastOptions);
+      }
+      if (data.status === true) {
+        localStorage.setItem(
+          process.env.REACT_APP_LOCALHOST_KEY,
+          JSON.stringify(data.user)
+        );
+        navigate("/");
+      }
+    }
   };
 
   return (
@@ -83,7 +94,7 @@ function Register() {
           </div>
           <input
             type="text"
-            placeholder="Username"
+            placeholder="Usuário"
             name="username"
             onChange={(e) => handleChange(e)}
           />
@@ -95,19 +106,19 @@ function Register() {
           />
           <input
             type="password"
-            placeholder="Password"
+            placeholder="Senha"
             name="password"
             onChange={(e) => handleChange(e)}
           />
           <input
             type="password"
-            placeholder="Confirm Password"
+            placeholder="Confirmar Senha"
             name="confirmPassword"
             onChange={(e) => handleChange(e)}
           />
-          <button type="submit">Create User</button>
+          <button type="submit">Criar Conta</button>
           <span>
-            Already have an account ? <Link to="/login">Login.</Link>
+            Já possui uma conta ? <Link to="/login">Login.</Link>
           </span>
         </form>
       </FormContainer>
@@ -124,7 +135,7 @@ const FormContainer = styled.div`
   justify-content: center;
   gap: 1rem;
   align-items: center;
-  background-color: #20b4da;
+  background-color: #20B4DA;
   .brand {
     display: flex;
     align-items: center;
@@ -155,13 +166,13 @@ const FormContainer = styled.div`
     width: 100%;
     font-size: 1rem;
     &:focus {
-      border: 0.1rem solid #000000;
+      border: 0.1rem solid #A6DC25;
       outline: none;
     }
   }
   button {
-    background-color: #a6dc25;
-    color: white;
+    background-color: #A6DC25;
+    color: black;
     padding: 1rem 2rem;
     border: none;
     font-weight: bold;
@@ -170,17 +181,16 @@ const FormContainer = styled.div`
     font-size: 1rem;
     text-transform: uppercase;
     &:hover {
-      background-color: black;
+      background-color: #A6DC25;
     }
   }
   span {
     color: black;
     text-transform: uppercase;
     a {
-      color: #a6dc25;
+      color: #A6DC25;
       text-decoration: none;
       font-weight: bold;
     }
   }
 `;
-export default Register;
