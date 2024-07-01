@@ -7,6 +7,8 @@ export default function Contacts({ contacts, changeChat }) {
   const [currentUserName, setCurrentUserName] = useState(undefined);
   const [currentUserImage, setCurrentUserImage] = useState(undefined);
   const [currentSelected, setCurrentSelected] = useState(undefined);
+  const [searchTerm, setSearchTerm] = useState("");
+
   useEffect(async () => {
     const data = await JSON.parse(
       localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
@@ -14,10 +16,16 @@ export default function Contacts({ contacts, changeChat }) {
     setCurrentUserName(data.username);
     setCurrentUserImage(data.avatarImage);
   }, []);
+
   const changeCurrentChat = (index, contact) => {
     setCurrentSelected(index);
     changeChat(contact);
   };
+
+  const filteredContacts = contacts.filter(contact =>
+    contact.username.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <>
       {currentUserImage && currentUserImage && (
@@ -26,13 +34,20 @@ export default function Contacts({ contacts, changeChat }) {
             <img src={Logo} alt="logo" />
             <h3>Chat App</h3>
           </div>
+          <div className="search">
+            <input
+              type="text"
+              placeholder="Search users..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
           <div className="contacts">
-            {contacts.map((contact, index) => {
+            {filteredContacts.map((contact, index) => {
               return (
                 <div
                   key={contact._id}
-                  className={`contact ${index === currentSelected ? "selected" : ""
-                    }`}
+                  className={`contact ${index === currentSelected ? "selected" : ""}`}
                   onClick={() => changeCurrentChat(index, contact)}
                 >
                   <div className="avatar">
@@ -65,9 +80,10 @@ export default function Contacts({ contacts, changeChat }) {
     </>
   );
 }
+
 const Container = styled.div`
   display: grid;
-  grid-template-rows: 10% 75% 15%;
+  grid-template-rows: 10% 10% 65% 15%;
   overflow: hidden;
   background-color: #ffffff;
   .brand {
@@ -80,6 +96,18 @@ const Container = styled.div`
     }
     h3 {
       color: black;
+    }
+  }
+  .search {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.5rem;
+    input {
+      width: 90%;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 0.5rem;
     }
   }
   .contacts {
