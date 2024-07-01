@@ -37,7 +37,7 @@ export default function Contacts({ contacts, changeChat }) {
           <div className="search">
             <input
               type="text"
-              placeholder="Search users..."
+              placeholder="Procurar Usuários..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
